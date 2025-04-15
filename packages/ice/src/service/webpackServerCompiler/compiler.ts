@@ -24,6 +24,10 @@ export class WebpackServerCompiler {
     const { userServerConfig } = options;
     const { webpackConfig = {} } = userServerConfig;
     const definitions = await this.getEsbuildInject();
+
+    const ignorePlugins = userServerConfig.ignores
+      ? userServerConfig.ignores.map((ignore) => new webpack.IgnorePlugin(ignore))
+      : [];
     return getWebpackConfig({
       config: {
         mode: 'production',
@@ -44,7 +48,7 @@ export class WebpackServerCompiler {
           },
           ...(webpackConfig.output as any),
         },
-        plugins: [...options.plugins, ...(webpackConfig.plugins || [])] as any,
+        plugins: [...ignorePlugins, ...options.plugins, ...(webpackConfig.plugins || [])] as any,
         externals: options.externals,
         outputDir: options.outdir,
         enableCache: false,
